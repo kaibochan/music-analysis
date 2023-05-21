@@ -13,17 +13,6 @@ import matplotlib.pyplot as plt
 from process import MusicThroughput
 from compile import Song
 
-# print the bin date, total length, and list of songs
-def print_bin_data(bin_data: MusicThroughput):
-    print(f'{bin_data.start_time.date()}\t'
-              + strftime('%H:%M:%S', gmtime(bin_data.throughput)))
-
-    songs_list = ''
-    for song in bin_data.songs:
-        songs_list += f'{song}, '
-    songs_list = songs_list.removesuffix(', ')
-    print(f'\t{songs_list}')
-
 # Graph the music histogram
 def graph_histogram(music_histogram: list[MusicThroughput], bin_size_days, years_to_show):
     history_to_show = years_to_show * timedelta(days=365).total_seconds()
@@ -47,15 +36,15 @@ def graph_histogram(music_histogram: list[MusicThroughput], bin_size_days, years
     lbls = []
 
     total_time = 0
-    min_tp = 0
-    max_tp = 0
+    max_tp = None
     for i, bin_data in enumerate(music_histogram_filtered):
         t.append(bin_data.start_time.timestamp())
 
+        # Find total music time and max throughput across all bins
         m.append(bin_data.throughput)
         total_time += bin_data.throughput
-        if bin_data.throughput > max_tp:
-            max_tp = bin_data.throughput
+        if max_tp is None or bin_data.throughput > max_tp.throughput:
+            max_tp = bin_data
 
         # Leave every other label blank for spacing
         if i % skip_mod == 0:
@@ -66,23 +55,24 @@ def graph_histogram(music_histogram: list[MusicThroughput], bin_size_days, years
         else:
             lbls.append('')
     
-    print(f'Total music made: {total_time}')
+    # Display overall statistics about histogram
+    max_start = f'{max_tp.start_time.month}/{max_tp.start_time.day}/'\
+        + f'{max_tp.start_time.year - 2000}'
+    max_end = f'{max_tp.end_time.month}/{max_tp.end_time.day}/'\
+        + f'{max_tp.end_time.year - 2000}'
+    print(f'Total music made between: {total_time:.1f} seconds')
+    print(f'Maximum music made between {max_start} - {max_end}: '
+          + f'{max_tp.throughput:.1f} seconds')
 
+    # Graph histogram
     df = pd.DataFrame({'time': t, 'throughput': m})
 
     sns.set_style('whitegrid')
     ax = sns.barplot(data=df, x='time', y='throughput', orient='v', width=1.0)
 
-    num_ticks = 15
-    delta = 1 / num_ticks
-    yticks = arange(0, 1 + delta, delta)
-    for i, tick in enumerate(yticks):
-        yticks[i] = tick * max_tp
-
     ax.set(xlabel=f'Time (tΔ = {bin_size_days:.1f} days)',
            ylabel='Total music made (seconds)',
-           title=f'Total Music Made Per Every {bin_size_days:.1f} Days',
-           yticks=yticks)
+           title=f'Total Music Made Per Every {bin_size_days:.1f} Days')
 
     plt.xticks(range(len(t)), labels=lbls, rotation=-60)
     plt.show()
@@ -90,19 +80,21 @@ def graph_histogram(music_histogram: list[MusicThroughput], bin_size_days, years
 # Compiles all songs into a histogram, depicting when (over some time delta)
 # and how much music in total over said time delta
 def main():
+    expected_parameters = '(float)bin_size_days, [(float)years_to_show]'
     try:
         bin_size_days = float(argv[1])
     except ValueError:
-        print('Mismatch parameter type, expected a float')
+        print('Mismatch parameter type.\nExpected: ' + expected_parameters)
         return
     except IndexError:
-        print(f'Received {len(argv) - 1} parameters, expected 1 or 2')
+        print(f'Received {len(argv) - 1} parameters.\n'
+              + 'Expected: ' + expected_parameters)
         return
 
     try:
         years_to_show = float(argv[2])
     except ValueError:
-        print('Mismatch parameter type, expected a float')
+        print('Mismatch parameter type.\nExpected: ' + expected_parameters)
         return
     except IndexError:
         years_to_show = datetime.now().year

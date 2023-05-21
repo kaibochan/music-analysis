@@ -1,11 +1,15 @@
-# This program pulls from preset locations and exported bookmarks files
+# This program pulls from preset locations and an exported bookmarks file
 # in order to save the song information into a json file for later analysis
+# Preset locations: '{KAISTUFF}:\Creating\Music\analog',
+#                   '{KAISTUFF}:\Creating\Music\beepbox'
+# Bookmarks file must be named 'bookmarks.html'
 
 from functools import total_ordering
 from json import dumps
 from os import listdir
 from os.path import getctime, getsize, samefile, basename, splitext
 from pyquery import PyQuery as pq
+from bs4 import BeautifulSoup as bs
 from selenium.webdriver import ChromeOptions
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -13,7 +17,6 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver import Chrome, ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
 from tqdm import tqdm
 from mutagen.wave import WAVE
 from mutagen.mp3 import MP3
@@ -168,29 +171,23 @@ class SongCompiler:
     @classmethod
     def get_bookmarked_songs_info(cls) -> tuple[list[str], list[str],
                                                 list[float]]:
-        new_bookmarks = 'music_bookmarks.html'
-        old_bookmarks = 'Music Sketchbook 4_20_22.html'
-
-        d = pq(open(old_bookmarks).read())
-        anchors = d('a')
+        
+        bookmarks = 'bookmarks.html'
         names = []
         links = []
         times = []
-        for a in anchors:
-            names.append(a.text)
-            links.append('https://jummbus.bitbucket.io/#'
-                         + a.attrib['href'].split('#')[1])
-            times.append(float(a.attrib['add_date']))
 
-        d = pq(open(new_bookmarks).read())
-        anchors = d('a')
-        for a in anchors:
-            if a.text in names:
-                continue
-            names.append(a.text)
+        soup = bs(open(bookmarks).read())
+        songs_header = soup(lambda tag:
+                            tag.name == 'h3' and tag.text == 'Songs')[0]
+        songs_list = songs_header.find_parent().next_sibling.find_all('a')
+
+        # Retrieve song information and link for each item in Songs
+        for link in songs_list:
+            names.append(link.text)
             links.append('https://jummbus.bitbucket.io/#'
-                         + a.attrib['href'].split('#')[1])
-            times.append(float(a.attrib['add_date']))
+                         + link['href'].split('#')[1])
+            times.append(float(link['add_date']))
 
         return (names, links, times)
 

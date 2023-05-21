@@ -28,16 +28,19 @@ class MusicThroughput:
                   ) -> tuple[list[MusicThroughput], float]:
         songs.sort()
 
+        # Calculate number of bins in histogram
         bin_size = timedelta(bin_size_in_days).total_seconds()
         earliest_time_unix = songs[0].creation_time
         latest_time_unix = songs[-1].creation_time
         num_bins = ceil((latest_time_unix - earliest_time_unix) / bin_size)
 
+        # Populate histogram with MusicThroughput date (bins of songs)
         histogram = [None] * num_bins
         for i, bin in enumerate(histogram):
-            start_time = datetime.fromtimestamp(earliest_time_unix + i * bin_size)
-            end_time = datetime.fromtimestamp(earliest_time_unix +(i + 1)
-                                            * bin_size)
+            start_time = datetime.fromtimestamp(earliest_time_unix
+                                                + i * bin_size)
+            end_time = datetime.fromtimestamp(earliest_time_unix
+                                              + (i + 1) * bin_size)
             
             songs_made = list(filter(lambda song: 
                 cls.was_song_made_between(start_time, end_time, song), songs))
