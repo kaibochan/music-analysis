@@ -3,10 +3,8 @@
 
 from math import ceil
 from sys import argv
-from time import strftime, gmtime
 from json import load
 from datetime import datetime, timedelta
-from numpy import arange
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt

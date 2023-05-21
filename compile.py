@@ -8,7 +8,6 @@ from functools import total_ordering
 from json import dumps
 from os import listdir
 from os.path import getctime, getsize, samefile, basename, splitext
-from pyquery import PyQuery as pq
 from bs4 import BeautifulSoup as bs
 from selenium.webdriver import ChromeOptions
 from selenium.webdriver.chrome.service import Service
