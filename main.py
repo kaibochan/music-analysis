@@ -111,5 +111,5 @@ def main():
     graph_histogram(music_histogram, bin_size_days, years_to_show)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

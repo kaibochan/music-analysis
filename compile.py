@@ -109,7 +109,7 @@ class SongCompiler:
     # Get drive letter of KAISTUFF flashdrive
     @classmethod
     def get_kaistuff_drive_letter(cls):
-        drive_name = 'KAISTUFF'
+        drive_name = "KAISTUFF"
         drive_type = 2
         c = WMI()
         matching_drives = list(filter(lambda disk:
@@ -207,7 +207,7 @@ class SongCompiler:
 
             try:
                 # Click file menu
-                xpath = '//div[@class="selectContainer menu file"]/select[1]'
+                xpath = "//div[@class='selectContainer menu file']/select[1]"
                 file_dropdown = WebDriverWait(driver, 10).until(
                     EC.visibility_of_element_located((By.XPATH, xpath)))
                 ActionChains(driver).move_to_element(file_dropdown).click()\
@@ -218,10 +218,10 @@ class SongCompiler:
                 select.select_by_value("export")
 
                 # Get song length
-                xpath = '//div[@class="prompt noSelection"]'
+                xpath = "//div[@class='prompt noSelection']"
                 export_menu = WebDriverWait(driver, 10).until(
                     EC.visibility_of_element_located((By.XPATH, xpath)))
-                xpath = './/div[2]//div[1]'
+                xpath = ".//div[2]//div[1]"
                 length_element = export_menu.find_element(By.XPATH, xpath)
                 mins, secs = length_element.text.split(":")
                 length = float(mins) * 60 + float(secs)
@@ -282,5 +282,5 @@ class SongCompiler:
             f.write(json_string)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     SongCompiler.save_songs_json()
