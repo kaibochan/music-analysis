@@ -47,30 +47,30 @@ def graph_histogram(music_histogram: list[MusicThroughput], bin_size_days, years
         # Leave every other label blank for spacing
         if i % skip_mod == 0:
             # labels are in the format MM/YY
-            lbls.append(f'{bin_data.start_time.month}/'
-                        + f'{bin_data.start_time.day}/'
-                        + f'{bin_data.start_time.year - 2000}')
+            lbls.append(f"{bin_data.start_time.month}/"
+                        + f"{bin_data.start_time.day}/"
+                        + f"{bin_data.start_time.year - 2000}")
         else:
-            lbls.append('')
+            lbls.append("")
     
     # Display overall statistics about histogram
-    max_start = f'{max_tp.start_time.month}/{max_tp.start_time.day}/'\
-        + f'{max_tp.start_time.year - 2000}'
-    max_end = f'{max_tp.end_time.month}/{max_tp.end_time.day}/'\
-        + f'{max_tp.end_time.year - 2000}'
-    print(f'Total music made between: {total_time:.1f} seconds')
-    print(f'Maximum music made between {max_start} - {max_end}: '
-          + f'{max_tp.throughput:.1f} seconds')
+    max_start = f"{max_tp.start_time.month}/{max_tp.start_time.day}/"\
+        + f"{max_tp.start_time.year - 2000}"
+    max_end = f"{max_tp.end_time.month}/{max_tp.end_time.day}/"\
+        + f"{max_tp.end_time.year - 2000}"
+    print(f"Total music made between: {total_time:.1f} seconds")
+    print(f"Maximum music made between {max_start} - {max_end}: "
+          + f"{max_tp.throughput:.1f} seconds")
 
     # Graph histogram
-    df = pd.DataFrame({'time': t, 'throughput': m})
+    df = pd.DataFrame({"time": t, "throughput": m})
 
-    sns.set_style('whitegrid')
-    ax = sns.barplot(data=df, x='time', y='throughput', orient='v', width=1.0)
+    sns.set_style("whitegrid")
+    ax = sns.barplot(data=df, x="time", y="throughput", orient="v", width=1.0)
 
-    ax.set(xlabel=f'Time (tΔ = {bin_size_days:.1f} days)',
-           ylabel='Total music made (seconds)',
-           title=f'Total Music Made Per Every {bin_size_days:.1f} Days')
+    ax.set(xlabel=f"Time (tΔ = {bin_size_days:.1f} days)",
+           ylabel="Total music made (seconds)",
+           title=f"Total Music Made Per Every {bin_size_days:.1f} Days")
 
     plt.xticks(range(len(t)), labels=lbls, rotation=-60)
     plt.show()
@@ -78,21 +78,21 @@ def graph_histogram(music_histogram: list[MusicThroughput], bin_size_days, years
 # Compiles all songs into a histogram, depicting when (over some time delta)
 # and how much music in total over said time delta
 def main():
-    expected_parameters = '(float)bin_size_days, [(float)years_to_show]'
+    expected_parameters = "(float)bin_size_days, [(float)years_to_show]"
     try:
         bin_size_days = float(argv[1])
     except ValueError:
-        print('Mismatch parameter type.\nExpected: ' + expected_parameters)
+        print("Mismatch parameter type.\nExpected: " + expected_parameters)
         return
     except IndexError:
-        print(f'Received {len(argv) - 1} parameters.\n'
-              + 'Expected: ' + expected_parameters)
+        print(f"Received {len(argv) - 1} parameters.\n"
+              + "Expected: " + expected_parameters)
         return
 
     try:
         years_to_show = float(argv[2])
     except ValueError:
-        print('Mismatch parameter type.\nExpected: ' + expected_parameters)
+        print("Mismatch parameter type.\nExpected: " + expected_parameters)
         return
     except IndexError:
         years_to_show = datetime.now().year
@@ -100,16 +100,16 @@ def main():
     songs = []
 
     # Load from songs.json into songs list
-    with open('songs.json') as f:
+    with open("songs.json") as f:
         data = load(f)
         for obj in data:
-            songs.append(Song(obj['name'], obj['length'],
-                              obj['creation_time']))
+            songs.append(Song(obj["name"], obj["length"],
+                              obj["creation_time"]))
 
     music_histogram = MusicThroughput.create_histogram(songs, bin_size_days)
 
     graph_histogram(music_histogram, bin_size_days, years_to_show)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -1,0 +1,8 @@
+env/
+__pycache__/
+*.pyc
+.vscode
+
+songs.json
+bookmarks.html
+bookmarks_old.html
