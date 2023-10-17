@@ -7,12 +7,12 @@
 from functools import total_ordering
 from json import dumps
 from os import listdir
-from os.path import getctime, getsize, samefile, basename, splitext
+from os.path import getmtime, getsize, samefile, basename, splitext
 from bs4 import BeautifulSoup as bs
-from selenium.webdriver import Chrome, ActionChains
-from selenium.webdriver import ChromeOptions
+from selenium.webdriver import Firefox, ActionChains
+from selenium.webdriver import FirefoxOptions
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.wait import WebDriverWait
@@ -51,7 +51,7 @@ class SongFile:
     
     # Initialize metadata relating to file stats
     def _init_file_metadata(self) -> None:
-        self.creation_time = getctime(self.file_path)
+        self.creation_time = getmtime(self.file_path)
         self.size = getsize(self.file_path)
 
     def __str__(self) -> str:
@@ -106,26 +106,6 @@ class Song:
 # Main purpose is to compile a list of songs in the form of their file paths
 class SongCompiler:
 
-    # Get drive letter of KAISTUFF flashdrive
-    @classmethod
-    def get_kaistuff_drive_letter(cls):
-        drive_name = "KAISTUFF"
-        drive_type = 2
-        c = WMI()
-        matching_drives = list(filter(lambda disk:
-                                      disk.VolumeName == drive_name
-                                      and disk.DriveType == drive_type,
-                                      c.Win32_LogicalDisk()))
-        
-        if len(matching_drives) == 0:
-            print(f"Unable to locate {drive_name} drive")
-            return None
-        elif len(matching_drives) > 1:
-            print(f"Ambiguous, multiple drives found titled {drive_name}")
-            return None
-        
-        return matching_drives[0].Caption
-
     # Returns true if the file is a wave or mp3 file
     # file must be an absolute path
     @classmethod
@@ -135,13 +115,9 @@ class SongCompiler:
     # Compiles a list of audio file paths from predefined directories
     @classmethod
     def get_songs_from_files(cls) -> list[Song]:
-        drive_letter = cls.get_kaistuff_drive_letter()
 
-        if drive_letter is None:
-            return []
-
-        beepbox_path = f"{drive_letter}\\Creating\\Music\\beepbox"
-        analog_path = f"{drive_letter}\\Creating\\Music\\analog"
+        beepbox_path = f"C:\\Users\\kaibu\\Documents\\Kai-Stuff\\Creating\\Music\\beepbox"
+        analog_path = f"C:\\Users\\kaibu\\Documents\\Kai-Stuff\\Creating\\Music\\analog"
 
         beepbox_filenames = listdir(beepbox_path)
         analog_filenames = listdir(analog_path)
@@ -196,9 +172,9 @@ class SongCompiler:
         songs = []
         
         # Initialize web driver
-        webdriver_service = Service("C:/Program Files (x86)/chromedriver.exe")
-        options = ChromeOptions()
-        driver = Chrome(service=webdriver_service, options=options)
+        webdriver_service = Service("C:/Program Files/GeckoDriver/geckodriver.exe")
+        options = FirefoxOptions()
+        driver = Firefox(service=webdriver_service, options=options)
 
         for i, _ in tqdm(enumerate(info[0])):
 
